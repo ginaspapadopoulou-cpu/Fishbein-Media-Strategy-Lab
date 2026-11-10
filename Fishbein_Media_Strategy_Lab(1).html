@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fishbein Media Strategy Lab</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#f8fafc;padding:20px}
+.wrap{max-width:1000px;margin:auto}
+.card{background:#172033;border:1px solid #334155;border-radius:22px;padding:22px;margin-bottom:18px}
+h1{margin:0 0 8px;font-size:40px}.sub{color:#cbd5e1}.row{display:grid;grid-template-columns:2fr .5fr 1fr 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #334155}
+.head{font-size:13px;color:#94a3b8;font-weight:700}.big{font-size:38px;font-weight:900}.scores{display:flex;justify-content:space-between;align-items:center;background:#101827;border-radius:16px;padding:16px;margin-top:16px}.net{color:#ff5a66}.dis{color:#60a5fa}
+input[type=range]{width:100%}.v{text-align:center;font-weight:800}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{padding:13px;border-radius:12px;border:1px solid #475569;background:#1f2a3d;color:#fff;font-weight:700;cursor:pointer}
+button.primary{background:#f59e0b;color:#111827;border:0}.result{margin-top:14px;background:#0f172a;padding:14px;border-radius:12px;color:#cbd5e1;min-height:46px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1.6fr .5fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Fishbein Media Strategy Lab</h1>
+<p class="sub">Netflix vs Disney+ — μετακίνησε τις πεποιθήσεις bᵢ και δες πώς αλλάζει η συνολική στάση A = Σ(eᵢ × bᵢ).</p>
+
+<div class="grid">
+<section class="card">
+<h2>1. Υπολογισμός στάσης</h2>
+<div class="row head"><div>Χαρακτηριστικό</div><div>eᵢ</div><div>Netflix bᵢ</div><div>Disney+ bᵢ</div></div>
+<div id="rows"></div>
+<div class="scores">
+<div><div class="net">Netflix</div><div class="big net" id="ns"></div></div>
+<div id="lead" style="font-weight:800"></div>
+<div style="text-align:right"><div class="dis">Disney+</div><div class="big dis" id="ds"></div></div>
+</div>
+</section>
+
+<section class="card">
+<h2>2. Managerial intervention</h2>
+<p class="sub">Δοκίμασε παρεμβάσεις στο Marketing Mix και παρατήρησε ποια πεποίθηση αλλάζει.</p>
+<div class="buttons">
+<button id="np">Netflix: Price + Promotion</button>
+<button id="db">Disney+: Product + Promotion</button>
+<button id="reset">Επαναφορά</button>
+<button class="primary" id="challenge">Νέα πρόκληση</button>
+</div>
+<div class="result" id="msg">Ξεκίνα αλλάζοντας ένα slider ή πάτησε ένα έτοιμο σενάριο.</div>
+<div class="result" id="ch">Πρόκληση: Ποια πεποίθηση θα προσπαθούσες να αλλάξεις πρώτη και γιατί;</div>
+</section>
+</div>
+</div>
+
+<script>
+const D=[
+{name:"Ποικιλία σε Σειρές (Binge-watching)",e:1.0,n:6,d:4},
+{name:"Προσιτή Τιμή / Φοιτητικό Πακέτο",e:0.9,n:2,d:5},
+{name:"Blockbusters / Marvel / Nostalgia",e:0.4,n:3,d:7},
+{name:"Δωρεάν Mobile Games (Value-Add)",e:0.6,n:5,d:1}
+];
+const init=D.map(x=>({n:x.n,d:x.d}));
+const rows=document.getElementById("rows"),ns=document.getElementById("ns"),ds=document.getElementById("ds"),lead=document.getElementById("lead"),msg=document.getElementById("msg");
+
+function build(){
+ rows.innerHTML="";
+ D.forEach((x,i)=>{
+  const r=document.createElement("div");r.className="row";
+  r.innerHTML=`<div>${x.name}</div><div>${x.e.toFixed(1)}</div>
+  <div><input type="range" min="1" max="7" value="${x.n}" data-i="${i}" data-b="n"><div class="v net">${x.n}</div></div>
+  <div><input type="range" min="1" max="7" value="${x.d}" data-i="${i}" data-b="d"><div class="v dis">${x.d}</div></div>`;
+  rows.appendChild(r);
+ });
+ rows.querySelectorAll("input").forEach(el=>el.addEventListener("input",e=>{
+  const i=+e.target.dataset.i,b=e.target.dataset.b,v=+e.target.value;D[i][b]=v;e.target.nextElementSibling.textContent=v;calc();
+ }));
+ calc();
+}
+function calc(){
+ const a=D.reduce((s,x)=>s+x.e*x.n,0),b=D.reduce((s,x)=>s+x.e*x.d,0);
+ ns.textContent=a.toFixed(1);ds.textContent=b.toFixed(1);
+ lead.textContent=Math.abs(a-b)<.05?"Ισοπαλία":a>b?`Netflix +${(a-b).toFixed(1)}`:`Disney+ +${(b-a).toFixed(1)}`;
+}
+document.getElementById("np").onclick=()=>{D[1].n=4;build();msg.textContent="Netflix: b(Τιμή) 2 → 4. Νέο επιμέρους σκορ τιμής: 0,9 × 4 = 3,6. Η συνολική στάση αυξάνεται."}
+document.getElementById("db").onclick=()=>{D[0].d=6;build();msg.textContent="Disney+: b(Binge-watching) 4 → 6. Νέο επιμέρους σκορ: 1,0 × 6 = 6,0."}
+document.getElementById("reset").onclick=()=>{D.forEach((x,i)=>{x.n=init[i].n;x.d=init[i].d});build();msg.textContent="Επαναφορά στις αρχικές τιμές του παραδείγματος."}
+const C=[
+"Ποια πεποίθηση θα προσπαθούσες να αλλάξεις πρώτη και γιατί;",
+"Αν ήσουν Netflix, ποιο P του Marketing Mix θα χρησιμοποιούσες για την αντίληψη τιμής;",
+"Αν ήσουν Disney+, πώς θα ενίσχυες την αντίληψη binge-watching;",
+"Ποια αλλαγή έχει μεγαλύτερη επίδραση όταν το eᵢ είναι υψηλό;"
+];let ci=0;
+document.getElementById("challenge").onclick=()=>{ci=(ci+1)%C.length;document.getElementById("ch").textContent="Πρόκληση: "+C[ci]}
+build();
+</script>
+</body>
+</html>
